@@ -1,18 +1,9 @@
 import express, { RequestHandler } from "express";
 import { Task } from "../types/Task";
-import { randomUUID } from "crypto";
+import { connectToDatabase } from "../../db/mongoClient";
+import { ObjectId } from "mongodb";
 
 const router = express.Router();
-
-let tasks: Task[] = [
-  {
-    id: "001",
-    title: "First task",
-    dateCreated: Date.now(),
-    inProgress: false,
-    completed: false,
-  },
-];
 
 interface UpdatedTask {
   title?: string;
@@ -21,46 +12,109 @@ interface UpdatedTask {
 }
 
 // GET all tasks
-router.get("/", (req, res) => {
-  res.json(tasks);
-});
+router.get("/", async (req, res): Promise<void> => {
+  try {
+    const db = await connectToDatabase();
+    const tasksCollection = db.collection("tasks");
+
+    // Fetch all tasks from the collection
+    const tasks = await tasksCollection.find().toArray();
+    res.json(tasks);
+  } catch (err) {
+    console.error("Error fetching tasks:", err);
+    res.status(500).json({ error: "Failed to fetch tasks" });
+  }
+}) as RequestHandler;
 
 // POST new task
-router.post("/", (req, res) => {
-  const { title } = req.body;
-  const newTask: Task = {
-    id: randomUUID(),
-    title,
-    dateCreated: Date.now(),
-    inProgress: false,
-    completed: false,
-  };
-  tasks.push(newTask);
-  res.status(201).json(newTask);
-});
+router.post("/", async (req, res): Promise<void> => {
+  try {
+    const { title } = req.body;
+
+    const newTask: Omit<Task, "_id"> = {
+      title,
+      dateCreated: Date.now(),
+      inProgress: false,
+      completed: false,
+    };
+
+    const db = await connectToDatabase();
+    const tasksCollection = db.collection("tasks");
+
+    // Insert the new task into the database
+    const result = await tasksCollection.insertOne(newTask);
+
+    // Return the newly created task
+    const insertedTask = await tasksCollection.findOne({
+      _id: result.insertedId,
+    });
+    res.status(201).json(insertedTask);
+  } catch (err) {
+    console.error("Error adding task:", err);
+    res.status(500).json({ error: "Failed to add task" });
+  }
+}) as RequestHandler;
 
 // PATCH task (update title, inProgress status or completed status)
-router.patch("/:id", ((req, res) => {
-  const task = tasks.find((t) => t.id === req.params.id);
-  if (!task) return res.status(404).json({ error: "Task not found" });
+router.patch("/:id", async (req, res): Promise<void> => {
+  try {
+    const { id } = req.params;
+    const { title, inProgress, completed } = req.body;
 
-  if (typeof req.body.title === "string") {
-    task.title = req.body.title;
-  }
-  if (typeof req.body.inProgress === "boolean") {
-    task.inProgress = req.body.inProgress;
-  }
-  if (typeof req.body.completed === "boolean") {
-    task.completed = req.body.completed;
-  }
+    const db = await connectToDatabase();
+    const tasksCollection = db.collection("tasks");
 
-  res.json(task);
-}) as RequestHandler);
+    // Find the task by its MongoDB ObjectId
+    const task = await tasksCollection.findOne({ _id: new ObjectId(id) });
+
+    if (!task) {
+      res.status(404).json({ error: "Task not found" });
+      return;
+    }
+
+    // Prepare update object
+    const updatedTask: UpdatedTask = {};
+    if (title !== undefined) updatedTask.title = title;
+    if (inProgress !== undefined) updatedTask.inProgress = inProgress;
+    if (completed !== undefined) updatedTask.completed = completed;
+
+    // Update the task in the database
+    const result = await tasksCollection.updateOne(
+      { _id: new ObjectId(id) },
+      { $set: updatedTask }
+    );
+
+    // Fetch the updated task
+    const updated = await tasksCollection.findOne({ _id: new ObjectId(id) });
+
+    res.json(updated);
+  } catch (err) {
+    console.error("Error updating task:", err);
+    res.status(500).json({ error: "Failed to update task" });
+  }
+}) as RequestHandler;
 
 // DELETE task
-router.delete("/:id", (req, res) => {
-  tasks = tasks.filter((t) => t.id !== req.params.id);
-  res.status(204).send();
-});
+router.delete("/:id", async (req, res): Promise<void> => {
+  try {
+    const { id } = req.params;
+
+    const db = await connectToDatabase();
+    const tasksCollection = db.collection("tasks");
+
+    // Delete the task from the database
+    const result = await tasksCollection.deleteOne({ _id: new ObjectId(id) });
+
+    if (result.deletedCount === 0) {
+      res.status(404).json({ error: "Task not found" });
+      return;
+    }
+
+    res.status(204).send();
+  } catch (err) {
+    console.error("Error deleting task:", err);
+    res.status(500).json({ error: "Failed to delete task" });
+  }
+}) as RequestHandler;
 
 export default router;
