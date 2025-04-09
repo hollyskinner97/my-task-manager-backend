@@ -1,5 +1,7 @@
+import { ObjectId } from "mongodb";
+
 export interface Task {
-  id: string;
+  _id: ObjectId;
   title: string;
   dateCreated: number;
   inProgress: boolean;
