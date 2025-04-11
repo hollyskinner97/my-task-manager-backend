@@ -8,6 +8,7 @@ const router = express.Router();
 interface UpdatedTask {
   title?: string;
   inProgress?: boolean;
+  deadline?: Date | null;
   completed?: boolean;
 }
 
@@ -34,6 +35,7 @@ router.post("/", async (req, res): Promise<void> => {
     const newTask: Omit<Task, "_id"> = {
       title,
       dateCreated: Date.now(),
+      deadline: null,
       inProgress: false,
       completed: false,
     };
@@ -59,13 +61,31 @@ router.post("/", async (req, res): Promise<void> => {
 router.patch("/:id", async (req, res): Promise<void> => {
   try {
     const { id } = req.params;
-    const { title, inProgress, completed } = req.body;
+    const { title, inProgress, completed, deadline } = req.body;
 
-    if (title && title.length > 50) {
+    if (
+      title !== undefined &&
+      (typeof title !== "string" || title.length > 50)
+    ) {
       res
         .status(400)
         .json({ error: "Task title must be 50 characters or fewer." });
       return;
+    }
+
+    // Validate deadline (if present)
+    let parsedDeadline: Date | null | undefined;
+    if (deadline !== undefined) {
+      if (deadline === null) {
+        parsedDeadline = null;
+      } else {
+        const parsed = new Date(deadline);
+        if (isNaN(parsed.getTime())) {
+          res.status(400).json({ error: "Invalid deadline date format." });
+          return;
+        }
+        parsedDeadline = parsed;
+      }
     }
 
     const db = await connectToDatabase();
@@ -84,6 +104,7 @@ router.patch("/:id", async (req, res): Promise<void> => {
     if (title !== undefined) updatedTask.title = title;
     if (inProgress !== undefined) updatedTask.inProgress = inProgress;
     if (completed !== undefined) updatedTask.completed = completed;
+    if (parsedDeadline !== undefined) updatedTask.deadline = parsedDeadline;
 
     // Update the task in the database
     const result = await tasksCollection.updateOne(
