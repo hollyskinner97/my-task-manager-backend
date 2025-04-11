@@ -11,18 +11,21 @@ async function seed() {
       inProgress: false,
       completed: false,
       dateCreated: Date.now(),
+      deadline: null,
     },
     {
       title: "Build an app using Typescript",
       inProgress: false,
       completed: false,
       dateCreated: Date.now(),
+      deadline: null,
     },
     {
       title: "Refactor app for MongoDB",
       inProgress: true,
       completed: false,
       dateCreated: Date.now(),
+      deadline: null,
     },
   ];
 
