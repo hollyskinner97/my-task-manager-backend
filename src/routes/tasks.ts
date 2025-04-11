@@ -61,6 +61,13 @@ router.patch("/:id", async (req, res): Promise<void> => {
     const { id } = req.params;
     const { title, inProgress, completed } = req.body;
 
+    if (title && title.length > 50) {
+      res
+        .status(400)
+        .json({ error: "Task title must be 50 characters or fewer." });
+      return;
+    }
+
     const db = await connectToDatabase();
     const tasksCollection = db.collection("tasks");
 
