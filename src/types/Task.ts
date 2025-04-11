@@ -4,6 +4,7 @@ export interface Task {
   _id: ObjectId;
   title: string;
   dateCreated: number;
-  inProgress: boolean;
+  deadline?: Date | null;
+  inProgress?: boolean;
   completed: boolean;
 }
