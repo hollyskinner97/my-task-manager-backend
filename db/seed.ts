@@ -12,6 +12,7 @@ async function seed() {
       completed: false,
       dateCreated: Date.now(),
       deadline: null,
+      userId: "HS",
     },
     {
       title: "Build an app using Typescript",
@@ -19,6 +20,7 @@ async function seed() {
       completed: false,
       dateCreated: Date.now(),
       deadline: null,
+      userId: "HS",
     },
     {
       title: "Refactor app for MongoDB",
@@ -26,6 +28,7 @@ async function seed() {
       completed: false,
       dateCreated: Date.now(),
       deadline: null,
+      userId: "HS",
     },
   ];
 
