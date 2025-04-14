@@ -7,4 +7,5 @@ export interface Task {
   deadline?: Date | null;
   inProgress?: boolean;
   completed: boolean;
+  userId: string;
 }
