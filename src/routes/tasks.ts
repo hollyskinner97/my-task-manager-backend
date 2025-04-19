@@ -4,7 +4,7 @@ import { connectToDatabase } from "../../db/mongoClient";
 import { ObjectId } from "mongodb";
 import { authenticateToken, AuthRequest } from "../middleware/authMiddleware";
 
-const router = express.Router();
+const tasksRouter = express.Router();
 
 interface UpdatedTask {
   title?: string;
@@ -14,7 +14,7 @@ interface UpdatedTask {
 }
 
 // GET all tasks
-router.get(
+tasksRouter.get(
   "/",
   authenticateToken,
   async (req: AuthRequest, res): Promise<void> => {
@@ -40,7 +40,7 @@ router.get(
 ) as RequestHandler;
 
 // POST new task
-router.post(
+tasksRouter.post(
   "/",
   authenticateToken,
   async (req: AuthRequest, res): Promise<void> => {
@@ -80,7 +80,7 @@ router.post(
 ) as RequestHandler;
 
 // PATCH task (update title, inProgress status or completed status)
-router.patch(
+tasksRouter.patch(
   "/:id",
   authenticateToken,
   async (req: AuthRequest, res): Promise<void> => {
@@ -157,7 +157,7 @@ router.patch(
 ) as RequestHandler;
 
 // DELETE task
-router.delete(
+tasksRouter.delete(
   "/:id",
   authenticateToken,
   async (req: AuthRequest, res): Promise<void> => {
@@ -186,4 +186,4 @@ router.delete(
   }
 ) as RequestHandler;
 
-export default router;
+export default tasksRouter;

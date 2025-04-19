@@ -4,11 +4,11 @@ import jwt from "jsonwebtoken";
 import { connectToDatabase } from "../../db/mongoClient";
 import { ObjectId } from "mongodb";
 
-const router = express.Router();
+const usersRouter = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 
 // Add a user via registration
-router.post("/register", async (req, res): Promise<void> => {
+usersRouter.post("/register", async (req, res): Promise<void> => {
   const { email, password } = req.body;
   const db = await connectToDatabase();
   const usersCollection = db.collection("users");
@@ -42,7 +42,7 @@ router.post("/register", async (req, res): Promise<void> => {
 }) as RequestHandler;
 
 // user login route
-router.post("/login", async (req, res): Promise<void> => {
+usersRouter.post("/login", async (req, res): Promise<void> => {
   const { email, password } = req.body;
   const db = await connectToDatabase();
   const usersCollection = db.collection("users");
@@ -72,3 +72,5 @@ router.post("/login", async (req, res): Promise<void> => {
     res.status(500).json({ message: "Login error" });
   }
 }) as RequestHandler;
+
+export default usersRouter;
