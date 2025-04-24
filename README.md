@@ -4,6 +4,7 @@ This is the backend of the Task Manager app, built with Express.js, MongoDB and 
 
 ## Features
 
+- **Token Authentication**: Users are given a token upon registration (JWT) which allows them to access the app functionality.
 - **Task Management**: CRUD (Create, Read, Update, Delete) operations for tasks.
 - **Task Completion**: Mark tasks as completed or not completed.
 - **Deadline Management**: Set deadlines, validate deadlines, and remove deadlines.
@@ -13,9 +14,10 @@ This is the backend of the Task Manager app, built with Express.js, MongoDB and 
 
 ### Technologies Used
 
-- **TypeScript:** Adds static typing to JavaScript for better development experience.
+- **TypeScript:** Adds static typing to JavaScript for code quality control.
 - **Express**: Web framework for Node.js used to build the API.
 - **MongoDB**: Database used to store task information.
+- **JWT**: For token authentication.
 
 ### Installation
 
@@ -32,6 +34,8 @@ This is the backend of the Task Manager app, built with Express.js, MongoDB and 
 
 4. Run the app:
    npm run dev
+
+5. The front end of this app can be found at: https://github.com/hollyskinner97/my-task-manager-frontend
 
 ## API Endpoints
 
